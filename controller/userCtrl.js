@@ -43,7 +43,7 @@ const createUser = asyncHandler(async (req, res) => {
 const loginUserCtrl = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   // check if user exists or not
-  const findUser = await User.findOne({ email });
+  const findUser = await User.findOne({ email }).populate("wishlist");
   if (findUser && (await findUser.isPasswordMatched(password))) {
     const refreshToken = await generateRefreshToken(findUser?._id);
     const updateuser = await User.findByIdAndUpdate(
@@ -64,6 +64,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
       email: findUser?.email,
       mobile: findUser?.mobile,
       token: generateToken(findUser?._id),
+      wishlist: findUser?.wishlist
     });
   } else {
     throw new Error("Invalid Credentials");
@@ -327,10 +328,47 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
+const addToWishlist = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { prodId } = req.body;
+  try {
+    const user = await User.findById(_id);
+    const alreadyadded = user.wishlist.find((id) => id.toString() === prodId);
+    if (alreadyadded) {
+      let user = await User.findByIdAndUpdate(
+        _id,
+        {
+          $pull: { wishlist: prodId },
+        },
+        {
+          new: true,
+        }
+      );
+      res.json(user);
+    } else {
+      let user = await User.findByIdAndUpdate(
+        _id,
+        {
+          $push: { wishlist: prodId },
+        },
+        {
+          new: true,
+        }
+      );
+      res.json(user);
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
 const getWishlist = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   try {
     const findUser = await User.findById(_id).populate("wishlist");
+    console.log('findUser value', findUser);
+    // const products = await Product.find({ _id: { $in: findUser.wishlist } })
+    // console.log('the wishlist products', products);
     res.json(findUser);
   } catch (error) {
     throw new Error(error);
@@ -539,6 +577,7 @@ module.exports = {
   forgotPasswordToken,
   resetPassword,
   loginAdmin,
+  addToWishlist,
   getWishlist,
   saveAddress,
   userCart,

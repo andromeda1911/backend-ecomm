@@ -3,11 +3,13 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 
 const authMiddleware = asyncHandler(async (req, res, next) => {
+    console.log('----------token verification  asasd', req.headers);
     let token;
     if(req?.headers?.authorization?.startsWith('Bearer')) {
         token = req?.headers?.authorization?.split(' ')[1];
         try {
             if (token){
+                console.log('----------token verification');
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 console.log(decoded);
                 const user = await User.findById(decoded.id);

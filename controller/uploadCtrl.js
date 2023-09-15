@@ -7,6 +7,7 @@ const {
 } = require("../utils/cloudinary");
 const uploadImages = asyncHandler(async (req, res) => {
   try {
+    console.log('url hit');
     const uploader = (path) => cloudinaryUploadImg(path, "images");
     const urls = [];
     const files = req.files;
