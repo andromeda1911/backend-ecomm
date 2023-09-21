@@ -64,7 +64,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
       email: findUser?.email,
       mobile: findUser?.mobile,
       token: generateToken(findUser?._id),
-      wishlist: findUser?.wishlist
+      wishlist: findUser?.wishlist,
     });
   } else {
     throw new Error("Invalid Credentials");
@@ -363,47 +363,45 @@ const addToWishlist = asyncHandler(async (req, res) => {
 });
 
 const getWishlist = asyncHandler(async (req, res) => {
+  console.log('req---user---', req.user);
   const { _id } = req.user;
   try {
     const findUser = await User.findById(_id).populate("wishlist");
-    console.log('findUser value', findUser);
-    // const products = await Product.find({ _id: { $in: findUser.wishlist } })
-    // console.log('the wishlist products', products);
+    console.log("findUser value", findUser);
     res.json(findUser);
   } catch (error) {
     throw new Error(error);
   }
 });
 
-const userCart = asyncHandler(async (req, res) => {
-  const { cart } = req.body;
+const removeFromWishlist = asyncHandler(async (req, res) => {
   const { _id } = req.user;
+  console.log('removewishlist----req----', req.body);
+  try {
+    let user = await User.updateOne(
+      { _id: _id },
+      { $pull: { wishlist: { $in: req.body.wishlistId } } },
+      { new: true }
+    );
+    res.json(user);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+const userCart = asyncHandler(async (req, res) => {
+  const { productId,color,quantity,price } = req.body;
+  const { _id } = req.user;
+  console.log('reqbody-----------', req.body);
   validateMongoDbId(_id);
   try {
-    let products = [];
-    const user = await User.findById(_id);
-    // check if user already have product in cart
-    const alreadyExistCart = await Cart.findOne({ orderby: user._id });
-    if (alreadyExistCart) {
-      alreadyExistCart.remove();
-    }
-    for (let i = 0; i < cart.length; i++) {
-      let object = {};
-      object.product = cart[i]._id;
-      object.count = cart[i].count;
-      object.color = cart[i].color;
-      let getPrice = await Product.findById(cart[i]._id).select("price").exec();
-      object.price = getPrice.price;
-      products.push(object);
-    }
-    let cartTotal = 0;
-    for (let i = 0; i < products.length; i++) {
-      cartTotal = cartTotal + products[i].price * products[i].count;
-    }
+    
     let newCart = await new Cart({
-      products,
-      cartTotal,
-      orderby: user?._id,
+      userId:_id,
+      productId,
+      color,
+      price,
+      quantity
     }).save();
     res.json(newCart);
   } catch (error) {
@@ -415,14 +413,41 @@ const getUserCart = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   validateMongoDbId(_id);
   try {
-    const cart = await Cart.findOne({ orderby: _id }).populate(
-      "products.product"
-    );
+    const cart = await Cart.find({ userId: _id }).populate(
+      "productId"
+    ).populate("color");
     res.json(cart);
   } catch (error) {
     throw new Error(error);
   }
 });
+
+const removeProductFromCart = asyncHandler(async(req, res) => {
+  const { _id } = req.user;
+  const {cartItemId} = req.params;
+  validateMongoDbId(_id);
+  try {
+    const deleteFromCart = await Cart.deleteOne({userId: _id, _id: cartItemId})
+    res.json(deleteFromCart);
+  } catch (error) {
+    throw new Error(error);
+  }
+})
+
+const updateProductQuantityFromCart = asyncHandler(async(req, res) => {
+  const { _id } = req.user;
+  const {cartItemId, newQuantity} = req.params;
+  validateMongoDbId(_id);
+  try {
+    const cartItem = await Cart.findOne({userId: _id, _id: cartItemId})
+    cartItem.quantity = newQuantity;
+    cartItem.save();
+    res.json(cartItem);
+    res.json(deleteFromCart);
+  } catch (error) {
+    throw new Error(error);
+  }
+})
 
 const emptyCart = asyncHandler(async (req, res) => {
   const { _id } = req.user;
@@ -579,6 +604,7 @@ module.exports = {
   loginAdmin,
   addToWishlist,
   getWishlist,
+  removeFromWishlist,
   saveAddress,
   userCart,
   getUserCart,
@@ -589,4 +615,6 @@ module.exports = {
   updateOrderStatus,
   getAllOrders,
   getOrderByUserId,
+  removeProductFromCart,
+  updateProductQuantityFromCart
 };
