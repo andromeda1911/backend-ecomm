@@ -23,7 +23,8 @@ const {
   removeProductFromCart,
   updateProductQuantityFromCart,
   createOrder,
-  getMyOrders
+  getMyOrders,
+  emptyCart
 } = require("../controller/userCtrl");
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 const { checkout, paymentVerification } = require("../controller/paymentCtrl");
@@ -56,6 +57,7 @@ router.get("/:id", authMiddleware, isAdmin, getaUser);
 // router.delete("/empty-cart", authMiddleware, emptyCart);
 router.delete("/delete-product-cart/:cartItemId", authMiddleware, removeProductFromCart);
 router.put("/update-product-cart/:cartItemId/:newQuantity", authMiddleware, updateProductQuantityFromCart);
+router.delete("/empty-cart", authMiddleware, emptyCart);
 router.delete("/:id", deleteaUser);
 // router.put(
 //   "/order/update-order/:id",
