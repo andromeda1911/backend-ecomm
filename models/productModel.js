@@ -34,6 +34,10 @@ var productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    offermsg: {
+      type: String,
+      required: false
+    },
     sold: {
       type: Number,
       default: 0,
