@@ -332,6 +332,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 
 const addToWishlist = asyncHandler(async (req, res) => {
+  console.log('req', req.body);
   const { _id } = req.user;
   const { prodId } = req.body;
   try {

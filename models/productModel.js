@@ -43,6 +43,12 @@ var productSchema = new mongoose.Schema(
       default: 0,
     },
     images: [],
+    size: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Size"
+      }
+    ],
     color: [
       {
         type: mongoose.Schema.Types.ObjectId,
