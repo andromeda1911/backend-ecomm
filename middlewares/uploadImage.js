@@ -55,4 +55,18 @@ const blogImgResize = async (req, res, next) => {
   );
   next();
 };
-module.exports = { uploadPhoto, productImgResize, blogImgResize };
+const homeImgResize = async (req, res, next) => {
+  if (!req.files) return next();
+  await Promise.all(
+    req.files.map(async (file) => {
+      await sharp(file.path)
+        .resize(300, 300)
+        .toFormat("jpeg")
+        .jpeg({ quality: 90 })
+        .toFile(`public/images/home/${file.filename}`);
+      fs.unlinkSync(`public/images/home/${file.filename}`);
+    })
+  );
+  next();
+};
+module.exports = { uploadPhoto, productImgResize, blogImgResize, homeImgResize };
