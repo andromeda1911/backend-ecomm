@@ -103,6 +103,17 @@ const getAllProduct = asyncHandler(async (req, res) => {
   }
 });
 
+const searchProducts = asyncHandler(async(req, res) => {
+  console.log('=========',req.body)
+  const {searchString} = req.body;
+  try {
+    const searchResults = await Product.find({ "title": { $regex: '.*' + searchString + '.*', $options: 'i' }});
+    res.json(searchResults);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
 const rating = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   const { star, prodId, comment } = req.body;
@@ -198,4 +209,5 @@ module.exports = {
   deleteProduct,
   rating,
   uploadImages,
+  searchProducts
 };
