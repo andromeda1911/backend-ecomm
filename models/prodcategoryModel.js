@@ -9,6 +9,10 @@ var prodcategorySchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
+    showOnHomePage: {
+      type: Boolean,
+      required: true,
+    }
   },
   {
     timestamps: true,
