@@ -22,6 +22,10 @@ var cartSchema = new mongoose.Schema(
     color:{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Color"
+    },
+    size:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Size"
     }
   },
   {
