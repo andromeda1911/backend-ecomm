@@ -23,7 +23,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 
 const corsOptions = {
-  origin: 'http://localhost:3000', // Replace with your React app's local development server address
+  origin: 'http://peacockboutique.com.s3-website.ap-south-1.amazonaws.com', // Replace with your React app's local development server address
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 };
